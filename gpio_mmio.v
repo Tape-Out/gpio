@@ -1,3 +1,6 @@
+`ifndef GPIO_MMIO_V
+`define GPIO_MMIO_V
+
 `timescale 1ns/1ps
 
 `ifndef MAX_GPIO_NUM
@@ -60,8 +63,9 @@ module gpio_mmio #(
     wire [GPIO_WIDTH-1:0] active_irqs = (ip_level & ie) | (ip_edge & ie);
 
     integer i;
+    wire ip_edge_clear = (mem_valid && !mem_instr && (mem_addr == GPIO_IP_EDGE));
 
-    always @(posedge clk) begin
+    always @(posedge clk) begin: CHECK_IRQ
         if (!resetn) begin
             last_in    <= 0;
             ip_level   <= 0;
@@ -75,12 +79,14 @@ module gpio_mmio #(
                         ip_level[i] <= level_pol[i] ? gpio_in[i] : ~gpio_in[i];
                     end else begin: EDGE
                         ip_level[i] <= 1'b0;
-                        if (itr_rising[i] & ~last_in[i] & gpio_in[i])
+                        if (ip_edge_clear && (mem_wdata[i] & wmask_gpio[i])) begin
+                            ip_edge[i] <= 1'b0;
+                        end else if (eoi[i]) begin
+                            ip_edge[i] <= 1'b0;
+                        end else if ((itr_rising[i] & ~last_in[i] & gpio_in[i]) ||
+                                    (itr_falling[i] & last_in[i] & ~gpio_in[i])) begin
                             ip_edge[i] <= 1'b1;
-                        else ;
-                        if (itr_falling[i] & last_in[i] & ~gpio_in[i])
-                            ip_edge[i] <= 1'b1;
-                        else ;
+                        end else ;
                     end
                     if (eoi[i]) begin: CLEAR
                         ip_edge[i] <= 1'b0;
@@ -142,7 +148,6 @@ module gpio_mmio #(
                     GPIO_ITR_F:    itr_falling  <= (itr_falling & ~wmask_gpio)     | (mem_wdata[GPIO_WIDTH-1:0] & wmask_gpio);
                     GPIO_LEVEL_E:  level_en     <= (level_en & ~wmask_gpio)        | (mem_wdata[GPIO_WIDTH-1:0] & wmask_gpio);
                     GPIO_LEVEL_P:  level_pol    <= (level_pol & ~wmask_gpio)       | (mem_wdata[GPIO_WIDTH-1:0] & wmask_gpio);
-                    GPIO_IP_EDGE:  ip_edge      <= ip_edge & ~(mem_wdata[GPIO_WIDTH-1:0]&wmask_gpio);
                     default: ;
                 endcase
             end else mem_ready <= 0;
@@ -150,3 +155,5 @@ module gpio_mmio #(
     end
 
 endmodule
+
+`endif
