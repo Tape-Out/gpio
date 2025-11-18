@@ -88,9 +88,6 @@ module gpio_mmio #(
                             ip_edge[i] <= 1'b1;
                         end else ;
                     end
-                    if (eoi[i]) begin: CLEAR
-                        ip_edge[i] <= 1'b0;
-                    end
                 end else begin: OUTPUT_GPIO
                     ip_level[i] <= 1'b0;
                     ip_edge[i] <= 1'b0;
@@ -109,22 +106,31 @@ module gpio_mmio #(
         end
     endfunction
 
-    always @* begin: MMIO_READ
-        if (mem_valid && !mem_instr) begin
-            case (mem_addr)
-                GPIO_DATA_OUT: mem_rdata = zext32(gpio_out);
-                GPIO_DATA_IN:  mem_rdata = zext32(gpio_in);
-                GPIO_DIR:      mem_rdata = zext32(gpio_dir);
-                GPIO_IE:       mem_rdata = zext32(ie);
-                GPIO_IP_LEVEL: mem_rdata = zext32(ip_level);
-                GPIO_IP_EDGE:  mem_rdata = zext32(ip_edge);
-                GPIO_ITR_R:    mem_rdata = zext32(itr_rising);
-                GPIO_ITR_F:    mem_rdata = zext32(itr_falling);
-                GPIO_LEVEL_P:  mem_rdata = zext32(level_pol);
-                GPIO_LEVEL_E:  mem_rdata = zext32(level_en);
-                default:       mem_rdata = 0;
-            endcase
-        end else mem_rdata = 0;
+    always @(posedge clk) begin: MMIO_READ
+        if (!resetn) begin
+            mem_rdata <= 0;
+            mem_ready <= 0;
+        end else begin
+            if (mem_valid && (!mem_instr) && mem_wstrb==0) begin
+                mem_ready <= 1;
+                case (mem_addr)
+                    GPIO_DATA_OUT: mem_rdata <= zext32(gpio_out);
+                    GPIO_DATA_IN:  mem_rdata <= zext32(gpio_in);
+                    GPIO_DIR:      mem_rdata <= zext32(gpio_dir);
+                    GPIO_IE:       mem_rdata <= zext32(ie);
+                    GPIO_IP_LEVEL: mem_rdata <= zext32(ip_level);
+                    GPIO_IP_EDGE:  mem_rdata <= zext32(ip_edge);
+                    GPIO_ITR_R:    mem_rdata <= zext32(itr_rising);
+                    GPIO_ITR_F:    mem_rdata <= zext32(itr_falling);
+                    GPIO_LEVEL_P:  mem_rdata <= zext32(level_pol);
+                    GPIO_LEVEL_E:  mem_rdata <= zext32(level_en);
+                    default:       mem_rdata <= 0;
+                endcase
+            end else begin
+                mem_rdata <= 0;
+                mem_ready <= 0;
+            end
+        end
     end
 
     always @(posedge clk) begin: MMIO_WRITE
@@ -138,7 +144,7 @@ module gpio_mmio #(
             level_pol   <= 0;
             mem_ready   <= 0;
         end else begin
-            if (mem_valid && !mem_instr) begin
+            if (mem_valid && (!mem_instr) && mem_wstrb!=0) begin
                 mem_ready <= 1;
                 case (mem_addr)
                     GPIO_DATA_OUT: gpio_out     <= (gpio_out & ~wmask_gpio)        | (mem_wdata[GPIO_WIDTH-1:0] & wmask_gpio);
