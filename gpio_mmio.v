@@ -9,7 +9,7 @@
 
 module gpio_mmio #(
     parameter integer GPIO_WIDTH    =   `MAX_GPIO_NUM,
-    parameter integer BASE_ADDR     =   32'h8000_0000
+    parameter integer BASE_ADDR     =   32'h8100_4000
 )(
     input  wire                     clk,
     input  wire                     resetn,
@@ -106,13 +106,18 @@ module gpio_mmio #(
         end
     endfunction
 
+    always @(posedge clk) begin
+        if (!resetn) begin
+            mem_ready <= 0;
+        end
+        mem_ready <= mem_valid && !mem_instr;
+    end
+
     always @(posedge clk) begin: MMIO_READ
         if (!resetn) begin
             mem_rdata <= 0;
-            mem_ready <= 0;
         end else begin
             if (mem_valid && (!mem_instr) && mem_wstrb==0) begin
-                mem_ready <= 1;
                 case (mem_addr)
                     GPIO_DATA_OUT: mem_rdata <= zext32(gpio_out);
                     GPIO_DATA_IN:  mem_rdata <= zext32(gpio_in);
@@ -128,7 +133,6 @@ module gpio_mmio #(
                 endcase
             end else begin
                 mem_rdata <= 0;
-                mem_ready <= 0;
             end
         end
     end
@@ -142,7 +146,6 @@ module gpio_mmio #(
             itr_falling <= 0;
             level_en    <= 0;
             level_pol   <= 0;
-            mem_ready   <= 0;
         end else begin
             if (mem_valid && (!mem_instr) && mem_wstrb!=0) begin
                 mem_ready <= 1;
@@ -156,7 +159,7 @@ module gpio_mmio #(
                     GPIO_LEVEL_P:  level_pol    <= (level_pol & ~wmask_gpio)       | (mem_wdata[GPIO_WIDTH-1:0] & wmask_gpio);
                     default: ;
                 endcase
-            end else mem_ready <= 0;
+            end
         end
     end
 
