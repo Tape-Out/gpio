@@ -1,5 +1,7 @@
 # gpio
 
+![maturity](https://img.shields.io/badge/maturity-simulated-yellow) ![license](https://img.shields.io/badge/license-MulanPSL--2.0-blue)
+
 Configurable general-purpose IO in Bluespec. Implements the bus-neutral `RegIf`
 contract from `hwcore` and nothing else; attach it to APB4, AXI4-Lite, Wishbone
 or TL-UL at integration time.
