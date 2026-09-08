@@ -1,0 +1,5 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  ip:
+    uses: Tape-Out/.github/.github/workflows/ip.yml@main
