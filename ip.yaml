@@ -70,14 +70,14 @@ area:
       '24': 621.6
       '32': 823.48
     per: numPins
-  margin: 0.1007
+  margin: 0.1197
   model: points-additive
   error:
-    bound: 0.157
+    bound: 0.177
     sign: over
     note: parameter curves stored as measured points, features added on top, then
-      lifted by 0.1007 so that no untested combination predicts under; the worst came
-      in 9.57 percent under before the lift
+      lifted by 0.1197 so that no untested combination predicts under; the worst came
+      in 11.47 percent under before the lift
   measured:
   - at:
       numPins: 8
@@ -227,8 +227,8 @@ area:
     tool: ecc
     pdk: ics55
     freq_mhz: 100
-    measured: '2026-09-08'
-    gen_digest: sha256:84dc76c3debc92c0
+    measured: '2026-09-09'
+    gen_digest: sha256:d582de422ea9a09e
 emit:
 - kind: bsv
   package: GpioGen
