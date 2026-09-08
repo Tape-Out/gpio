@@ -34,50 +34,215 @@ features:
     type: bool
     default: true
     area:
-      fixed: 3.27
+      points:
+        '8': 266.56
+        '16': 522.2
+        '24': 733.32
+        '32': 1029.56
       per: numPins
-      k: 35.187
   bidir:
     type: bool
     default: true
     area:
-      fixed: -6.72
+      points:
+        '8': 106.96
+        '16': 231.56
+        '24': 257.6
+        '32': 475.16
       per: numPins
-      k: 16.205
   debounce:
     type: bool
     default: false
     depends:
     - bidir
     area:
-      fixed: 0.75
+      points:
+        '8': 259.0
+        '16': 510.44
+        '24': 808.08
+        '32': 904.4
       per: numPins
-      k: 31.477
 area:
   base:
-    fixed: 37.61
+    points:
+      '8': 211.12
+      '16': 391.72
+      '24': 621.6
+      '32': 823.48
     per: numPins
-    k: 32.048
-  margin: 0.033
-  model: linear-additive
+  margin: 0.1007
+  model: points-additive
   error:
-    bound: 0.08
+    bound: 0.157
     sign: over
-    note: affine terms lifted by a measured margin; without it 8_101 came in 2.75
-      percent under
+    note: parameter curves stored as measured points, features added on top, then
+      lifted by 0.1007 so that no untested combination predicts under; the worst came
+      in 9.57 percent under before the lift
+  measured:
+  - at:
+      numPins: 8
+      irq: false
+      bidir: false
+      debounce: false
+    um2: 211.12
+  - at:
+      numPins: 16
+      irq: false
+      bidir: false
+      debounce: false
+    um2: 391.72
+  - at:
+      numPins: 24
+      irq: false
+      bidir: false
+      debounce: false
+    um2: 621.6
+  - at:
+      numPins: 32
+      irq: false
+      bidir: false
+      debounce: false
+    um2: 823.48
+  - at:
+      numPins: 8
+      irq: false
+      bidir: true
+      debounce: false
+    um2: 318.08
+  - at:
+      numPins: 16
+      irq: false
+      bidir: true
+      debounce: false
+    um2: 623.28
+  - at:
+      numPins: 24
+      irq: false
+      bidir: true
+      debounce: false
+    um2: 879.2
+  - at:
+      numPins: 32
+      irq: false
+      bidir: true
+      debounce: false
+    um2: 1298.64
+  - at:
+      numPins: 8
+      irq: false
+      bidir: true
+      debounce: true
+    um2: 577.08
+  - at:
+      numPins: 16
+      irq: false
+      bidir: true
+      debounce: true
+    um2: 1133.72
+  - at:
+      numPins: 24
+      irq: false
+      bidir: true
+      debounce: true
+    um2: 1687.28
+  - at:
+      numPins: 32
+      irq: false
+      bidir: true
+      debounce: true
+    um2: 2203.04
+  - at:
+      numPins: 8
+      irq: true
+      bidir: false
+      debounce: false
+    um2: 477.68
+  - at:
+      numPins: 16
+      irq: true
+      bidir: false
+      debounce: false
+    um2: 913.92
+  - at:
+      numPins: 24
+      irq: true
+      bidir: false
+      debounce: false
+    um2: 1354.92
+  - at:
+      numPins: 32
+      irq: true
+      bidir: false
+      debounce: false
+    um2: 1853.04
+  - at:
+      numPins: 8
+      irq: true
+      bidir: true
+      debounce: false
+    um2: 646.52
+  - at:
+      numPins: 16
+      irq: true
+      bidir: true
+      debounce: false
+    um2: 1168.44
+  - at:
+      numPins: 24
+      irq: true
+      bidir: true
+      debounce: false
+    um2: 1704.08
+  - at:
+      numPins: 32
+      irq: true
+      bidir: true
+      debounce: false
+    um2: 2224.04
+  - at:
+      numPins: 8
+      irq: true
+      bidir: true
+      debounce: true
+    um2: 845.32
+  - at:
+      numPins: 16
+      irq: true
+      bidir: true
+      debounce: true
+    um2: 1687.0
+  - at:
+      numPins: 24
+      irq: true
+      bidir: true
+      debounce: true
+    um2: 2462.32
+  - at:
+      numPins: 32
+      irq: true
+      bidir: true
+      debounce: true
+    um2: 3302.6
   corner:
     tool: ecc
     pdk: ics55
     freq_mhz: 100
     measured: '2026-09-08'
-    gen_digest: sha256:9fbf93948591e390
+    gen_digest: sha256:84dc76c3debc92c0
 emit:
 - kind: bsv
   package: GpioGen
   module: mkGpio
   config_type: GpioCfg
   interface: GpioIfc
+  ctrl: regs
+  pins:
+  - name: pins
+    type: GpioPins
+    targs:
+    - numPins
 - kind: verilog-flat
   bus: apb4
 deps:
   hwcore: ^0.1
+  amba: ^0.1

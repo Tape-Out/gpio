@@ -1,9 +1,10 @@
 package GpioGen;
 
-import Apb4::*;
+import RegIf::*;
 import GpioRegs::*;
 
 // 与 E19 的手写 Gpio2.bsv 同构，差别只在寄存器组来自生成器。
+// 本包不认识任何总线：对外只给中立的 RegIf，接哪种总线由 wrap 或装配决定。
 typedef struct {
   Bool irq;
   Bool bidir;
@@ -15,12 +16,12 @@ interface GpioPins#(numeric type n);
   method Action pin_in((* port = "gpio_in" *) Bit#(n) v);
   (* always_ready, result = "gpio_out" *) method Bit#(n) pin_out;
   (* always_ready, result = "gpio_dir" *) method Bit#(n) pin_dir;
-  (* always_ready, result = "irq"      *) method Bool    irq;
 endinterface
 
 interface GpioIfc#(numeric type aw, numeric type dw, numeric type n);
-  interface Apb4SlavePins#(aw, dw) apb;
-  interface GpioPins#(n)           pins;
+  interface RegIf#(aw, dw) regs;
+  interface GpioPins#(n)   pins;
+  (* always_ready *) method Bool irq;
 endinterface
 
 module mkGpio#(GpioCfg cfg)(GpioIfc#(aw, dw, n))
@@ -49,15 +50,13 @@ module mkGpio#(GpioCfg cfg)(GpioIfc#(aw, dw, n))
     r.ista_set((r.din ^ prev) & r.din & r.ien);
   endrule
 
-  Apb4SlavePins#(aw, dw) sl <- mkApb4Slave(r.regs);
-
-  interface apb = sl;
+  interface regs = r.regs;
   interface GpioPins pins;
     method Action pin_in(Bit#(n) v); raw <= v; endmethod
     method Bit#(n) pin_out = r.dout;
     method Bit#(n) pin_dir = cfg.bidir ? r.dir : maxBound;
-    method Bool    irq     = cfg.irq ? (r.ista != 0) : False;
   endinterface
+  method Bool irq = cfg.irq ? (r.ista != 0) : False;
 endmodule
 
 endpackage

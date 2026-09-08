@@ -23,7 +23,6 @@ interface GpioPins#(numeric type n);
   method Action pin_in((* port = "gpio_in" *) Bit#(n) v);
   (* always_ready, result = "gpio_out" *) method Bit#(n) pin_out;
   (* always_ready, result = "gpio_dir" *) method Bit#(n) pin_dir;
-  (* always_ready, result = "irq"      *) method Bool    irq;
 endinterface
 
 // 本 IP 不认识任何总线：对外只给中立 RegIf 与自身引脚。
@@ -31,6 +30,7 @@ endinterface
 interface GpioIfc#(numeric type aw, numeric type dw, numeric type n);
   interface RegIf#(aw, dw) regs;
   interface GpioPins#(n)   pins;
+  (* always_ready *) method Bool irq;
 endinterface
 
 module mkGpio#(GpioCfg cfg)(GpioIfc#(aw, dw, n))
@@ -84,8 +84,8 @@ module mkGpio#(GpioCfg cfg)(GpioIfc#(aw, dw, n))
     method Action pin_in(Bit#(n) v); din <= v; endmethod
     method Bit#(n) pin_out = dout;
     method Bit#(n) pin_dir = cfg.bidir ? dir : maxBound;
-    method Bool    irq     = cfg.irq ? (ista[0] != 0) : False;
   endinterface
+  method Bool irq = cfg.irq ? (ista[0] != 0) : False;
 endmodule
 
 endpackage
