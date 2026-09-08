@@ -1,0 +1,38 @@
+ip: gpio
+contract: { aw: 8, dw: 32 }
+base: 0x10000000
+size: 0x100
+params: [numPins]
+
+regs:
+  - name: dout
+    offset: 0x00
+    desc: output data
+    fields: [ { name: val, width: numPins, sw: rw, hw: r, reset: 0 } ]
+  - name: din
+    offset: 0x04
+    desc: input sample
+    fields: [ { name: val, width: numPins, sw: r, hw: rw, reset: 0 } ]
+  - name: dir
+    offset: 0x08
+    desc: direction, 1 drives out
+    feature: bidir
+    fields: [ { name: val, width: numPins, sw: rw, hw: r, reset: 0 } ]
+  - name: ien
+    offset: 0x0C
+    desc: interrupt enable
+    feature: irq
+    fields: [ { name: val, width: numPins, sw: rw, hw: r, reset: 0 } ]
+  - name: ista
+    offset: 0x10
+    desc: interrupt status, write one to clear
+    feature: irq
+    fields:
+      - name: val
+        width: numPins
+        sw: rw
+        onwrite: woclr
+        hw: r
+        hwset: true
+        stickybit: true
+        reset: 0

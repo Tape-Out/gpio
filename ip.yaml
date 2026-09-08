@@ -1,0 +1,57 @@
+name: gpio
+version: 0.1.0
+spec: "0.1"
+
+identity:
+  slug: gpio-tapeout-bsv
+  display_name: Configurable GPIO
+  summary: Bus-neutral GPIO with a measured area price on every feature.
+  category: peripheral
+  subcategories: [gpio]
+  ip_family: gpio
+  integration_profile: [apb4-slave]
+  maturity: simulated
+
+contract:
+  version: 1
+  ctrl: { shape: flat, aw: 8, dw: 32 }
+  irq:
+    - { name: irq, kind: level }
+
+params:
+  numPins:
+    type: int
+    default: 32
+    range: [1, 32]
+    desc: 引脚数
+
+features:
+  irq:
+    type: bool
+    default: true
+    area: { fixed: 0, per: numPins, k: 37.23 }
+  bidir:
+    type: bool
+    default: true
+    area: { fixed: 0, per: numPins, k: 15.99 }
+  debounce:
+    type: bool
+    default: false
+    depends: [bidir]
+    area: { fixed: 29.7, per: numPins, k: 30.41 }
+
+area:
+  base: { fixed: 37.6, per: numPins, k: 32.05 }
+  model: linear-additive
+  error: { bound: 0.07, sign: over }
+  corner: { tool: ecc, pdk: ics55, freq_mhz: 100, measured: "2026-09-08" }
+
+emit:
+  - kind: bsv
+    package: GpioGen
+    module: mkGpio
+    config_type: GpioCfg
+    interface: GpioIfc
+
+deps:
+  hwcore: "^0.1"
