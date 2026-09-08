@@ -70,7 +70,7 @@ area:
     pdk: ics55
     freq_mhz: 100
     measured: '2026-09-08'
-    generator: '0.3'
+    gen_digest: sha256:9fbf93948591e390
 emit:
 - kind: bsv
   package: GpioGen
