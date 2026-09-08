@@ -1,57 +1,81 @@
 name: gpio
 version: 0.1.0
-spec: "0.1"
-
+spec: '0.1'
 identity:
   slug: gpio-tapeout-bsv
   display_name: Configurable GPIO
   summary: Bus-neutral GPIO with a measured area price on every feature.
   category: peripheral
-  subcategories: [gpio]
+  subcategories:
+  - gpio
   ip_family: gpio
-  integration_profile: [apb4-slave]
+  integration_profile:
+  - apb4-slave
   maturity: simulated
-
 contract:
   version: 1
-  ctrl: { shape: flat, aw: 8, dw: 32 }
+  ctrl:
+    shape: flat
+    aw: 8
+    dw: 32
   irq:
-    - { name: irq, kind: level }
-
+  - name: irq
+    kind: level
 params:
   numPins:
     type: int
     default: 32
-    range: [1, 32]
+    range:
+    - 1
+    - 32
     desc: 引脚数
-
 features:
   irq:
     type: bool
     default: true
-    area: { fixed: 0, per: numPins, k: 37.23 }
+    area:
+      fixed: 3.27
+      per: numPins
+      k: 35.187
   bidir:
     type: bool
     default: true
-    area: { fixed: 0, per: numPins, k: 15.99 }
+    area:
+      fixed: -6.72
+      per: numPins
+      k: 16.205
   debounce:
     type: bool
     default: false
-    depends: [bidir]
-    area: { fixed: 29.7, per: numPins, k: 30.41 }
-
+    depends:
+    - bidir
+    area:
+      fixed: 0.75
+      per: numPins
+      k: 31.477
 area:
-  base: { fixed: 37.6, per: numPins, k: 32.05 }
+  base:
+    fixed: 37.61
+    per: numPins
+    k: 32.048
+  margin: 0.033
   model: linear-additive
-  error: { bound: 0.07, sign: over }
-  corner: { tool: ecc, pdk: ics55, freq_mhz: 100, measured: "2026-09-08" }
-
+  error:
+    bound: 0.08
+    sign: over
+    note: affine terms lifted by a measured margin; without it 8_101 came in 2.75
+      percent under
+  corner:
+    tool: ecc
+    pdk: ics55
+    freq_mhz: 100
+    measured: '2026-09-08'
+    generator: '0.3'
 emit:
-  - kind: bsv
-    package: GpioGen
-    module: mkGpio
-    config_type: GpioCfg
-    interface: GpioIfc
-
+- kind: bsv
+  package: GpioGen
+  module: mkGpio
+  config_type: GpioCfg
+  interface: GpioIfc
 deps:
-  hwcore: "^0.1"
+  hwcore: ^0.1
