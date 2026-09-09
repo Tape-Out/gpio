@@ -35,10 +35,10 @@ features:
     default: true
     area:
       points:
-        '8': 266.56
-        '16': 522.2
-        '24': 733.32
-        '32': 1029.56
+        '8': 281.12
+        '16': 571.76
+        '24': 766.08
+        '32': 1033.48
       per: numPins
   bidir:
     type: bool
@@ -75,9 +75,9 @@ area:
   error:
     bound: 0.177
     sign: over
-    note: parameter curves stored as measured points, features added on top, then
-      lifted by 0.1197 so that no untested combination predicts under; the worst came
-      in 11.47 percent under before the lift
+    note: parameter curves stored as measured points, features added on top, 
+      then lifted by 0.1197 so that no untested combination predicts under; the 
+      worst came in 11.47 percent under before the lift
   measured:
   - at:
       numPins: 8
@@ -156,79 +156,79 @@ area:
       irq: true
       bidir: false
       debounce: false
-    um2: 477.68
+    um2: 492.24
   - at:
       numPins: 16
       irq: true
       bidir: false
       debounce: false
-    um2: 913.92
+    um2: 963.48
   - at:
       numPins: 24
       irq: true
       bidir: false
       debounce: false
-    um2: 1354.92
+    um2: 1387.68
   - at:
       numPins: 32
       irq: true
       bidir: false
       debounce: false
-    um2: 1853.04
+    um2: 1856.96
   - at:
       numPins: 8
       irq: true
       bidir: true
       debounce: false
-    um2: 646.52
+    um2: 636.16
   - at:
       numPins: 16
       irq: true
       bidir: true
       debounce: false
-    um2: 1168.44
+    um2: 1309.84
   - at:
       numPins: 24
       irq: true
       bidir: true
       debounce: false
-    um2: 1704.08
+    um2: 1727.04
   - at:
       numPins: 32
       irq: true
       bidir: true
       debounce: false
-    um2: 2224.04
+    um2: 2227.4
   - at:
       numPins: 8
       irq: true
       bidir: true
       debounce: true
-    um2: 845.32
+    um2: 877.8
   - at:
       numPins: 16
       irq: true
       bidir: true
       debounce: true
-    um2: 1687.0
+    um2: 1694.56
   - at:
       numPins: 24
       irq: true
       bidir: true
       debounce: true
-    um2: 2462.32
+    um2: 2553.6
   - at:
       numPins: 32
       irq: true
       bidir: true
       debounce: true
-    um2: 3302.6
+    um2: 3327.8
   corner:
     tool: ecc
     pdk: ics55
     freq_mhz: 100
-    measured: '2026-09-09'
-    gen_digest: sha256:d582de422ea9a09e
+    measured: '2026-09-10'
+    gen_digest: sha256:cb2baad06bd8b027
 emit:
 - kind: bsv
   package: GpioGen

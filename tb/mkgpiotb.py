@@ -53,6 +53,45 @@ if irq:
         wrong = True;
       end
 """
+    # 去抖开着时边沿要过滤几拍才到，对不齐「同一拍」，那一点跳过竞态这一段。
+    # 被测的性质在寄存器组里，与去抖无关，其余点覆盖得到。
+    after_clear = "Done" if debounce else "RaceLo"
+    race_phase = "" if debounce else f"""
+  // 同一拍里：引脚给上升沿（硬件置位）撞上写一清零（软件写清）。
+  // `stickybit` 的含义是「事件不会丢」，所以置位要压过写清。
+  // 分四步是为了把边沿摆在写的那一拍。引脚到 `din` 要过两级寄存器
+  // （测试台的 `pin` -> `pin_in` -> 寄存器组的 `din`），所以拉高之后
+  // 还要空一拍，第四拍模块才比出边沿、置位，与总线上的写一清零同拍。
+  rule raceLo (ph == RaceLo);
+    pin <= 0;
+    ph  <= RaceHi;
+  endrule
+
+  rule raceHi (ph == RaceHi);
+    pin <= {n}'h{hn(edgePat)};
+    ph  <= RaceWait;
+  endrule
+
+  rule raceWait (ph == RaceWait);
+    ph <= RaceWr;
+  endrule
+
+  rule raceWr (ph == RaceWr);
+    wr(rIST, 32'h{hx(ienPat)});
+    ph <= CheckRace;
+  endrule
+
+  rule checkRace (ph == CheckRace);
+    let x <- g.regs.access(RegReq {{ addr: rIST, write: False,
+                                    wdata: 0, wstrb: 4'hF }});
+    if ((x.rdata & 32'h{hx(ienPat)}) == 0) begin
+      $display("FAIL an edge landing with a write-one-clear was swallowed: %08h",
+               x.rdata);
+      bad <= True;
+    end
+    ph <= Done;
+  endrule
+"""
     irq_phase = f"""  // 第 {hot} 针给一个上升沿：使能开着，状态位该置起来
   rule edge_ (ph == Edge);
     pin <= {n}'h{hn(edgePat)};
@@ -83,16 +122,18 @@ if irq:
       wrong = True;
     end
     if (wrong) bad <= True;
-    ph <= Done;
+    ph <= {after_clear};
   endrule
-"""
+{race_phase}"""
+
     fin = """  rule fin (ph == Done);
     if (!sawIrq) begin
       $display("FAIL irq never went high");
       bad <= True;
     end
     if (bad || !sawIrq) $display("FAILED");
-    else $display("PASS gpio: output, direction, input, masked edge, write one clear");
+    else $display("PASS gpio: output, direction, input, masked edge, "
+                  + "write one clear, a set racing the clear survives");
     $finish((bad || !sawIrq) ? 1 : 0);
   endrule
 """
@@ -156,7 +197,8 @@ Bit#(8) rIEN = 8'h0C;
 Bit#(8) rIST = 8'h10;
 
 typedef enum {{ Setup, Drive, Settle, CheckOut, Feed, CheckIn, Edge,
-               CheckIrq, Clear, CheckClear, Done }}
+               CheckIrq, Clear, CheckClear, RaceLo, RaceHi, RaceWait,
+               RaceWr, CheckRace, Done }}
   Phase deriving (Bits, Eq);
 
 (* synthesize *)
