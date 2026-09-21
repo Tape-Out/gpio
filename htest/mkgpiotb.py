@@ -187,7 +187,7 @@ txt = f'''package Gpio{label}Tb;
 import RegIf::*;
 import GpioGen::*;
 
-// 由 tb/mkgpiotb.py 生成，勿手改。
+// 由 htest/mkgpiotb.py 生成，勿手改。
 // 这一点：numPins={n} irq={irq} bidir={bidir} debounce={debounce}
 
 Bit#(8) rOUT = 8'h00;
