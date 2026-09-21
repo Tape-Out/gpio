@@ -1,6 +1,6 @@
 # gpio
 
-![maturity](https://img.shields.io/badge/maturity-simulated-yellow) ![license](https://img.shields.io/badge/license-MulanPSL--2.0-blue)
+![maturity](https://img.shields.io/badge/maturity-simulated-yellow) ![license](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0%20OR%20MulanPSL--2.0-blue)
 
 Configurable general-purpose IO in Bluespec. Implements the bus-neutral `RegIf`
 contract from `hwcore` and nothing else; attach it to APB4, AXI4-Lite, Wishbone
@@ -38,4 +38,12 @@ device('h1000_0000, 'h100, g.regs, tagged Valid g.pins.irq)
 
 ## License
 
-Mulan PSL v2.
+任选其一：
+
+- [MIT](LICENSE-MIT)
+- [Apache 2.0](LICENSE-APACHE)
+- [木兰宽松许可证 第2版](LICENSE-MULAN)
+
+`SPDX-License-Identifier: MIT OR Apache-2.0 OR MulanPSL-2.0`
+
+除非另行说明，你提交的贡献按上述三者同时授权，不附加其他条件。
